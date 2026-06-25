@@ -1,6 +1,7 @@
 en:
   theme_metadata:
     settings:
-      tag_icon_list: 'Enter comma-delimited configuration for tags, in the format "tag-slug,icon,iconColor". Icon color is optional.'
+      tag_icon_list: 'Enter comma-delimited configuration for tags, in the format "tag-slug,icon,iconColor". For custom SVG icons defined in custom_svg_icons, use the full prefixed ID (e.g. custom-icons-my-logo). Icon color is optional.'
+      custom_svg_icons: 'Define custom SVG icons using path data. Format per icon: "id;viewBox;path1;path2;..." separated by "|". viewBox accepts 2 numbers (width height, auto-padded with 0 0) or 4 numbers (min-x min-y width height). The icon ID will be prefixed with "custom-icons-" and can be referenced in tag_icon_list. Example: "my-logo;24 24;M12 2L2 7l10 5z|arrow;0 0 300 500;M150 100L300 200;M150 200L300 100"'
       enable_colors_for_tag_labels: "Use colors for both tag icon and the tag label based on the configuration set above."
       svg_icons: "List of FontAwesome 6 icons used in this theme component"

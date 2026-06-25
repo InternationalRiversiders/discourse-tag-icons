@@ -8,3 +8,6 @@ svg_icons:
   default: "circle-question"
   type: "list"
   list_type: "compact"
+custom_svg_icons:
+  default: ""
+  type: "list"
