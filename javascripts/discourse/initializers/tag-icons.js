@@ -9,6 +9,18 @@ const CUSTOM_ICON_PREFIX = "custom-icons-";
 const CUSTOM_ICONS_CONTAINER_ID = "tag-icons-custom-icons";
 
 /**
+ * Maps tag display names (lowercased) to their slugs, built from the
+ * preloaded top_tags data.  Used to resolve slugs when the tag renderer
+ * receives a bare tag name string (e.g. from SelectKit / tag-chooser)
+ * instead of a full tag object.
+ *
+ * Populated during initialize() — null means "not yet built" or "unavailable".
+ *
+ * @type {Record<string, string> | null}
+ */
+let nameToSlugMap = null;
+
+/**
  * Parse the custom_svg_icons setting value into structured icon definitions.
  *
  * Input format (pipe-delimited):
@@ -142,7 +154,18 @@ function iconTagRenderer(tag, params) {
   const renderedTag = defaultRenderTag(tag, params);
 
   // Handle both string tags (legacy) and object tags (new format: { id, name, slug })
-  const tagName = typeof tag === "string" ? tag : tag.slug || tag.name;
+  let tagName = typeof tag === "string" ? tag : tag.slug || tag.name;
+
+  // When tag is a bare string (e.g. from SelectKit / tag-chooser), it is the
+  // display name, not the slug.  Try to resolve the slug from the preloaded
+  // top_tags data so that slug-based config entries still match.
+  let lookupName = tagName;
+  if (typeof tag === "string" && nameToSlugMap) {
+    const slug = nameToSlugMap[tagName.toLowerCase()];
+    if (slug) {
+      lookupName = slug;
+    }
+  }
 
   // Get the tag configuration list from the settings.
   const tagIconList = settings.tag_icon_list.split("|");
@@ -151,7 +174,7 @@ function iconTagRenderer(tag, params) {
   const tagIconItem = tagIconList.find(
     (line) =>
       line.indexOf(",") > -1 &&
-      tagName.toLowerCase() === line.substr(0, line.indexOf(",")).toLowerCase()
+      lookupName.toLowerCase() === line.substr(0, line.indexOf(",")).toLowerCase()
   );
 
   // Update the tag markup with an SVG icon, and inline-styles for the colors.
@@ -217,6 +240,30 @@ export default {
     // references them via iconHTML() / <use href="#custom-icons-...">.
     const customIcons = parseCustomSvgIcons(settings.custom_svg_icons);
     injectCustomSvgIcons(customIcons);
+
+    // Build a name→slug map from preloaded top_tags so that the tag
+    // renderer can resolve slugs when it receives a bare tag name string
+    // (e.g. from SelectKit / tag-chooser) instead of a full tag object.
+    try {
+      const preloadedDiv = document.querySelector("div#data-preloaded");
+      if (preloadedDiv?.dataset?.preloaded) {
+        const preloaded = JSON.parse(preloadedDiv.dataset.preloaded);
+        const topicList = JSON.parse(preloaded?.topic_list);
+        const topTags = topicList?.topic_list?.top_tags;
+        if (Array.isArray(topTags)) {
+          nameToSlugMap = {};
+          for (const t of topTags) {
+            if (t.name && t.slug) {
+              nameToSlugMap[t.name.toLowerCase()] = t.slug;
+            }
+          }
+        }
+      }
+    } catch {
+      // Preloaded data may not be available (e.g. in test / non-topic-list
+      // pages) — leave nameToSlugMap as null so the renderer falls back
+      // to direct string matching.
+    }
 
     withPluginApi((api) => {
       api.replaceTagRenderer(iconTagRenderer);
