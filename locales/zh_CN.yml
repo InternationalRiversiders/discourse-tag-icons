@@ -1,5 +1,6 @@
 zh_CN:
   theme_metadata:
+    description: 为标签添加图标，可用图标库(https://fontawesome.com/v6/search?ic=free-collection)或自定义 SVG Path 值。
     settings:
       tag_icon_list: '以逗号分隔的标签配置，格式为"标签缩略名,图标id,图标颜色"。图标颜色可选。对于在 custom_svg_icons 中定义的自定义 SVG 图标，请使用带前缀的完整 ID（例如 custom-icons-my-logo）。'
       custom_svg_icons: '使用路径数据定义自定义 SVG 图标。每个图标的格式："id;viewBox;path1;path2;..."。viewBox 接受 2 个数字（宽 高，自动补 0 0）或 4 个数字（min-x min-y 宽 高）。图标 ID 将自动添加 "custom-icons-" 前缀，可在 tag_icon_list 中引用。示例："my-logo;24 24;M12 2L2 7l10 5z"'
