@@ -6,6 +6,7 @@ import { contrastColor } from "../lib/colors";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const CUSTOM_ICON_PREFIX = "custom-icons-";
+const SVG_SPRITES_CONTAINER_ID = "svg-sprites";
 const CUSTOM_ICONS_CONTAINER_ID = "tag-icons-custom-icons";
 
 /**
@@ -91,7 +92,7 @@ function parseCustomSvgIcons(raw) {
  * iconHTML() can resolve them via <use href="#custom-icons-...">.
  *
  * The symbols are placed under:
- *   discourse-assets-icons > div#tag-icons-custom-icons > svg
+ *   discourse-assets-icons > div#svg-sprites > div#tag-icons-custom-icons > svg
  *
  * Each <path> child receives fill="currentColor" to inherit the tag's
  * configured --color1 / --color2 CSS custom properties.
@@ -106,15 +107,24 @@ function injectCustomSvgIcons(icons) {
   // Locate the Discourse assets container.
   let assetsContainer = document.querySelector("discourse-assets-icons");
 
+  // Find or create the svg-sprites container div.
+  let svgSpritesDiv = document.getElementById(SVG_SPRITES_CONTAINER_ID);
+  if (!svgSpritesDiv) {
+    svgSpritesDiv = document.createElement("div");
+    svgSpritesDiv.id = SVG_SPRITES_CONTAINER_ID;
+
+    if (assetsContainer) {
+      assetsContainer.appendChild(svgSpritesDiv);
+    }
+  }
+
   // Create or locate our custom-icons container div.
   let customDiv = document.getElementById(CUSTOM_ICONS_CONTAINER_ID);
   if (!customDiv) {
     customDiv = document.createElement("div");
     customDiv.id = CUSTOM_ICONS_CONTAINER_ID;
 
-    if (assetsContainer) {
-      assetsContainer.appendChild(customDiv);
-    }
+    svgSpritesDiv.appendChild(customDiv);
   }
 
   // Create or reuse the SVG sprite element.
